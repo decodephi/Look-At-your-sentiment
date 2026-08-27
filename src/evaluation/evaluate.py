@@ -227,29 +227,9 @@ def compare_models(results_df):
         "Precision",
         "Recall",
         "F1 Score"
-    ]].plot(
-        kind="bar",
-        figsize=(12, 6)
-    )
+    ]]
 
-    plt.title(
-        "Sentiment Model Performance Comparison"
-    )
 
-    plt.ylabel("Score")
-
-    plt.ylim(
-        0,
-        1
-    )
-
-    plt.xticks(
-        rotation=0
-    )
-
-    plt.tight_layout()
-
-    plt.show()
 
 
 # ============================================================
