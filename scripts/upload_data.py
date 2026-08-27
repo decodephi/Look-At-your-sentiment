@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 # Configuration
 # ============================================================
 
-AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 
 S3_BUCKET_NAME = os.getenv(
     "S3_BUCKET_NAME",
