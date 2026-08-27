@@ -2,6 +2,10 @@
 -e .
 
 # external requirements
+
+boto3
+
+
 click
 Sphinx
 coverage
