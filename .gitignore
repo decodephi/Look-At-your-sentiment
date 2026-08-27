@@ -14,7 +14,7 @@ cred.txt
 .imdbvenv/
 __pycache__/
 .env
-
+mlruns/
 
 # Distribution / packaging
 .Python

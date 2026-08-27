@@ -90,7 +90,11 @@ def log_model_experiment(
 
         mlflow.sklearn.log_model(
             model,
-            artifact_path="model"
+            name="model",
+            skops_trusted_types=[
+             "xgboost.core.Booster",
+             "xgboost.sklearn.XGBClassifier"
+            ]
         )
 
         print(
