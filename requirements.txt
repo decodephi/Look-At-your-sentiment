@@ -3,6 +3,9 @@
 
 # external requirements
 
+scikit-learn
+xgboost
+
 boto3
 
 
