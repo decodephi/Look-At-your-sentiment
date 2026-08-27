@@ -6,7 +6,12 @@
 scikit-learn
 xgboost
 
+
+mlflow
+
 boto3
+
+
 
 
 click
