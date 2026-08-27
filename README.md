@@ -1,7 +1,4 @@
-imdb
-==============================
+# Look-At-your-sentiment
 
-A short description of the project.
-
-Project Organization
+This project is implementation of MLops, where i have worked with DVC, MLflow, AWS ECR, S3, EC2.
 
