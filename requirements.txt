@@ -11,7 +11,9 @@ mlflow
 
 boto3
 
-
+fastapi 
+uvicorn 
+joblib
 
 
 click
