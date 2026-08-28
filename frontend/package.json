@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "dev": "npm --prefix sentiment-ui run dev"
+  },
+  "dependencies": {
+    "axios": "^1.20.0"
+  }
+}

@@ -1,0 +1,49 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 700px;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.result {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.error {
+  margin-top: 15px;
+  padding: 10px;
+}
