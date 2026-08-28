@@ -24,6 +24,10 @@ from src.tracking.mlflow_tracker import (
     log_model_experiment
 )
 
+from src.artifacts.artifact_manager import (
+    save_model_artifacts,
+    upload_artifacts_to_s3
+)
 
 # ============================================================
 # Pipeline Configuration
@@ -149,6 +153,27 @@ def run_training_pipeline():
         models,
         results_df
     )
+    
+    # ========================================================
+    # Save Best Model Artifacts
+    # ========================================================
+
+    print("\nSaving best model artifacts...")
+
+    save_model_artifacts(
+        model=best_model,
+        vectorizer=vectorizer
+    )
+    
+    # ========================================================
+    # Upload Artifacts to S3
+    # ========================================================
+
+    print("\nUploading model artifacts to S3...")
+
+    upload_artifacts_to_s3()
+    
+    #####################
 
     print("\n" + "=" * 70)
     print("BEST MODEL")
