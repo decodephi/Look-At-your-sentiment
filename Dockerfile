@@ -11,13 +11,13 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
+COPY setup.py .
+COPY src/ ./src/
+COPY app/ ./app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
-COPY src/ ./src/
-COPY app/ ./app/
-
 # API listens on port 8000
 EXPOSE 8000
 
