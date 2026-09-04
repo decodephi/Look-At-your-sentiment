@@ -1,0 +1,4 @@
+text_column: review
+target_column: sentiment
+remove_duplicates: true
+allowed_labels: [negative, positive]

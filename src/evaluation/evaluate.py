@@ -22,7 +22,8 @@ def evaluate_model(
     model,
     X_test,
     y_test,
-    model_name
+    model_name,
+    show_plots=True
 ):
     """
     Evaluate one trained classification model.
@@ -94,9 +95,10 @@ def evaluate_model(
         predictions
     )
 
-    plt.figure(figsize=(6, 5))
+    if show_plots:
+        plt.figure(figsize=(6, 5))
 
-    sns.heatmap(
+        sns.heatmap(
         cm,
         annot=True,
         fmt="d",
@@ -110,15 +112,13 @@ def evaluate_model(
         ]
     )
 
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
 
-    plt.title(
-        f"{model_name} - Confusion Matrix"
-    )
+        plt.title(f"{model_name} - Confusion Matrix")
 
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
 
     # --------------------------------------------------------
     # Return results
@@ -141,7 +141,8 @@ def evaluate_model(
 def evaluate_all_models(
     models,
     X_test,
-    y_test
+    y_test,
+    show_plots=True
 ):
     """
     Evaluate every trained model.
@@ -155,7 +156,8 @@ def evaluate_all_models(
             model=model,
             X_test=X_test,
             y_test=y_test,
-            model_name=model_name
+            model_name=model_name,
+            show_plots=show_plots
         )
 
         results.append(result)

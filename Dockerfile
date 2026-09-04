@@ -14,6 +14,8 @@ COPY requirements.txt .
 COPY setup.py .
 COPY src/ ./src/
 COPY app/ ./app/
+COPY best_model.pkl tfidf_vectorizer.pkl ./
+COPY best_model.pkl tfidf_vectorizer.pkl ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 

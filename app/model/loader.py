@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import joblib
 import boto3
 
@@ -27,9 +28,9 @@ VECTORIZER_S3_KEY = os.getenv(
     "models/tfidf_vectorizer.pkl"
 )
 
-LOCAL_MODEL_PATH = "/tmp/best_model.pkl"
-
-LOCAL_VECTORIZER_PATH = "/tmp/tfidf_vectorizer.pkl"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+LOCAL_MODEL_PATH = Path(os.getenv("MODEL_PATH", PROJECT_ROOT / "best_model.pkl"))
+LOCAL_VECTORIZER_PATH = Path(os.getenv("VECTORIZER_PATH", PROJECT_ROOT / "tfidf_vectorizer.pkl"))
 
 
 # ============================================================
@@ -79,7 +80,9 @@ def download_vectorizer():
 
 def load_model():
 
-    if not os.path.exists(LOCAL_MODEL_PATH):
+    if not LOCAL_MODEL_PATH.exists():
+        if os.getenv("MODEL_SOURCE", "local").lower() != "s3":
+            raise FileNotFoundError(f"Model artifact not found at {LOCAL_MODEL_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3.")
         download_model()
 
     return joblib.load(
@@ -93,7 +96,9 @@ def load_model():
 
 def load_vectorizer():
 
-    if not os.path.exists(LOCAL_VECTORIZER_PATH):
+    if not LOCAL_VECTORIZER_PATH.exists():
+        if os.getenv("MODEL_SOURCE", "local").lower() != "s3":
+            raise FileNotFoundError(f"Vectorizer artifact not found at {LOCAL_VECTORIZER_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3.")
         download_vectorizer()
 
     return joblib.load(

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
 import "./App.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 
 function App() {
@@ -24,19 +25,20 @@ function App() {
 
     try {
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/predict",
-        {
-          text: text
-        }
-      );
+      const response = await fetch(`${API_URL}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Unable to classify this text.");
 
-      setResult(response.data);
+      setResult(data);
 
     } catch (err) {
 
       setError(
-        err.response?.data?.detail ||
+        err.message ||
         "Unable to connect to the API."
       );
 
@@ -53,18 +55,18 @@ function App() {
 
       <div className="card">
 
-        <h1>Sentiment Analyzer</h1>
+        <p className="eyebrow">IMDB review intelligence</p>
+        <h1>Read the feeling<br /><em>between the lines.</em></h1>
 
         <p>
-          Enter a sentence and let the ML model
-          classify its sentiment.
+          Paste a review, reaction, or thought. The production model will weigh its tone in seconds.
         </p>
 
 
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Enter your sentence..."
+          placeholder="The cinematography was stunning, but the story never found its rhythm..."
           rows="6"
         />
 
@@ -73,7 +75,7 @@ function App() {
           onClick={predictSentiment}
           disabled={loading}
         >
-          {loading ? "Analyzing..." : "Analyze Sentiment"}
+          {loading ? "Reading tone..." : "Analyze sentiment"}
         </button>
 
 
@@ -87,7 +89,7 @@ function App() {
         {result && (
           <div className="result">
 
-            <h2>Result</h2>
+            <h2>Model read</h2>
 
             <p>
               <strong>Sentiment:</strong>{" "}
