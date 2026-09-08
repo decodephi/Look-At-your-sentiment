@@ -158,16 +158,56 @@ Check `http://localhost:8000/health` after the container starts.
 
 ## Kubernetes
 
-The manifest creates a two-replica API Deployment and a LoadBalancer Service. Make
-the image available to the target cluster, then apply the manifest:
+The manifest creates a two-replica API Deployment and a LoadBalancer Service. The
+EKS cluster must be created separately and the worker nodes must be allowed to pull
+from the ECR repository.
+
+### Create an EKS cluster
+
+Install and configure `eksctl`, then create the cluster in your AWS account:
 
 ```powershell
+eksctl create cluster --name sentiment-eks --region us-east-1 --nodes 2
+```
+
+This creates the EKS control plane and managed node group. The command can take
+several minutes and incurs AWS charges.
+
+### Build and push to ECR manually
+
+Set your AWS account and region, create the repository, then authenticate Docker:
+
+```powershell
+$env:AWS_REGION = "us-east-1"
+$env:AWS_ACCOUNT_ID = (aws sts get-caller-identity --query Account --output text)
+$env:ECR_REPOSITORY = "sentiment-api"
+aws ecr create-repository --repository-name $env:ECR_REPOSITORY --region $env:AWS_REGION
+aws ecr get-login-password --region $env:AWS_REGION | docker login --username AWS --password-stdin "$env:AWS_ACCOUNT_ID.dkr.ecr.$env:AWS_REGION.amazonaws.com"
+docker build -t "$env:ECR_REPOSITORY`:latest" .
+docker tag "$env:ECR_REPOSITORY`:latest" "$env:AWS_ACCOUNT_ID.dkr.ecr.$env:AWS_REGION.amazonaws.com/$env:ECR_REPOSITORY`:latest"
+docker push "$env:AWS_ACCOUNT_ID.dkr.ecr.$env:AWS_REGION.amazonaws.com/$env:ECR_REPOSITORY`:latest"
+```
+
+Configure `kubectl` for EKS and deploy the image:
+
+```powershell
+aws eks update-kubeconfig --name sentiment-eks --region $env:AWS_REGION
 kubectl apply -f infrastructure/kubernetes/deployment.yaml
+kubectl set image deployment/sentiment-api sentiment-api="$env:AWS_ACCOUNT_ID.dkr.ecr.$env:AWS_REGION.amazonaws.com/$env:ECR_REPOSITORY`:latest"
+kubectl rollout status deployment/sentiment-api
 kubectl get pods -l app=sentiment-api
 kubectl get service sentiment-api
 ```
 
 The deployment uses `/health` for readiness and liveness probes.
+
+### GitHub Actions deployment
+
+The **Build and deploy API to ECR and EKS** workflow performs the ECR push and EKS
+rollout. Configure a GitHub Actions secret named `AWS_ROLE_ARN` for an IAM role
+trusted by GitHub Actions through OIDC. The role needs permission to manage the
+named ECR repository and update the target EKS cluster. Run the workflow manually
+and provide the AWS region, EKS cluster name, and ECR repository name.
 
 ## License
 

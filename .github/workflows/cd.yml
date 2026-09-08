@@ -1,14 +1,67 @@
-name: API container
+name: Build and deploy API to ECR and EKS
 on:
   workflow_dispatch:
+    inputs:
+      aws_region:
+        description: AWS region
+        required: true
+        default: us-east-1
+      eks_cluster:
+        description: Existing EKS cluster name
+        required: true
+      ecr_repository:
+        description: ECR repository name
+        required: true
+        default: sentiment-api
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: ${{ inputs.aws_region }}
+      EKS_CLUSTER: ${{ inputs.eks_cluster }}
+      ECR_REPOSITORY: ${{ inputs.ecr_repository }}
+      IMAGE_TAG: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure ECR repository exists
+        shell: bash
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1 || \
+            aws ecr create-repository --repository-name "$ECR_REPOSITORY" >/dev/null
+
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: false
-          tags: sentiment-api:latest
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Configure kubectl for EKS
+        run: aws eks update-kubeconfig --name "$EKS_CLUSTER" --region "$AWS_REGION"
+
+      - name: Apply Kubernetes resources
+        run: kubectl apply -f infrastructure/kubernetes/deployment.yaml
+
+      - name: Deploy the ECR image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          kubectl -n default set image deployment/sentiment-api \
+            sentiment-api="$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          kubectl -n default rollout status deployment/sentiment-api --timeout=180s
