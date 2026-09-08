@@ -1,27 +1,22 @@
 FROM python:3.11-slim
 
-# Prevent Python from creating .pyc files
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONUNBUFFERED=1 \
+	PYTHONPATH=/app
 
-# Prevent Python output buffering
-ENV PYTHONUNBUFFERED=1
-
-# Application directory
 WORKDIR /app
 
-# Install Python dependencies
-COPY requirements.txt .
-COPY setup.py .
+COPY requirements.txt setup.py ./
 COPY src/ ./src/
 COPY app/ ./app/
 COPY best_model.pkl tfidf_vectorizer.pkl ./
-COPY best_model.pkl tfidf_vectorizer.pkl ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt \
+	&& useradd --create-home --shell /usr/sbin/nologin appuser \
+	&& chown -R appuser:appuser /app
 
-# Copy application source
-# API listens on port 8000
+USER appuser
+
 EXPOSE 8000
 
-# Start FastAPI
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
