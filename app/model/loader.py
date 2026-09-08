@@ -29,8 +29,9 @@ VECTORIZER_S3_KEY = os.getenv(
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-LOCAL_MODEL_PATH = Path(os.getenv("MODEL_PATH", PROJECT_ROOT / "best_model.pkl"))
-LOCAL_VECTORIZER_PATH = Path(os.getenv("VECTORIZER_PATH", PROJECT_ROOT / "tfidf_vectorizer.pkl"))
+LOCAL_MODEL_PATH = Path(os.getenv("MODEL_PATH", str(PROJECT_ROOT / "best_model.pkl")))
+LOCAL_VECTORIZER_PATH = Path(os.getenv("VECTORIZER_PATH", str(PROJECT_ROOT / "tfidf_vectorizer.pkl")))
+MODEL_SOURCE = os.getenv("MODEL_SOURCE", "local").lower()
 
 
 # ============================================================
@@ -60,6 +61,39 @@ def download_model():
 
 
 # ============================================================
+# Helper Functions
+# ============================================================
+
+def _has_local_artifacts() -> bool:
+    return (
+        LOCAL_MODEL_PATH.exists()
+        and LOCAL_VECTORIZER_PATH.exists()
+    )
+
+
+# ============================================================
+# Artifact Setup
+# ============================================================
+
+def ensure_local_artifacts():
+    """Prefer local packaged model artifacts and use S3 only when explicitly configured."""
+    if _has_local_artifacts():
+        return
+
+    if MODEL_SOURCE != "s3":
+        raise FileNotFoundError(
+            f"Missing model artifacts: {LOCAL_MODEL_PATH} and {LOCAL_VECTORIZER_PATH}. "
+            "Place the files in the project root or set MODEL_SOURCE=s3 and configure AWS credentials."
+        )
+
+    if not LOCAL_MODEL_PATH.exists():
+        download_model()
+
+    if not LOCAL_VECTORIZER_PATH.exists():
+        download_vectorizer()
+
+
+# ============================================================
 # Download Vectorizer
 # ============================================================
 
@@ -81,8 +115,10 @@ def download_vectorizer():
 def load_model():
 
     if not LOCAL_MODEL_PATH.exists():
-        if os.getenv("MODEL_SOURCE", "local").lower() != "s3":
-            raise FileNotFoundError(f"Model artifact not found at {LOCAL_MODEL_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3.")
+        if MODEL_SOURCE != "s3":
+            raise FileNotFoundError(
+                f"Model artifact not found at {LOCAL_MODEL_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3."
+            )
         download_model()
 
     return joblib.load(
@@ -97,8 +133,10 @@ def load_model():
 def load_vectorizer():
 
     if not LOCAL_VECTORIZER_PATH.exists():
-        if os.getenv("MODEL_SOURCE", "local").lower() != "s3":
-            raise FileNotFoundError(f"Vectorizer artifact not found at {LOCAL_VECTORIZER_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3.")
+        if MODEL_SOURCE != "s3":
+            raise FileNotFoundError(
+                f"Vectorizer artifact not found at {LOCAL_VECTORIZER_PATH}. Run scripts/run_training.py or set MODEL_SOURCE=s3."
+            )
         download_vectorizer()
 
     return joblib.load(

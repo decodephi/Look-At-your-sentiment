@@ -1,4 +1,5 @@
 from app.model.loader import (
+    ensure_local_artifacts,
     load_model,
     load_vectorizer
 )
@@ -7,6 +8,8 @@ from app.model.loader import (
 # ============================================================
 # Load Production Artifacts
 # ============================================================
+
+ensure_local_artifacts()
 
 model = load_model()
 

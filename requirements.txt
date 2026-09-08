@@ -2,22 +2,13 @@
 -e .
 
 # external requirements
-
 scikit-learn
 xgboost
 pandas
 pydantic
 mlflow
-
-
-mlflow
-
 boto3
-
-fastapi 
-uvicorn 
+fastapi
+uvicorn
 joblib
-
-#awscli==1.46.1
-
 python-dotenv>=0.5.1
