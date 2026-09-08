@@ -5,7 +5,7 @@ from src.training.train import prepare_training_data, train_logistic_regression
 
 
 def test_training_preparation_and_logistic_model():
-    dataframe = pd.DataFrame({"review": ["great film", "bad film"] * 4, "sentiment": ["positive", "negative"] * 4})
+    dataframe = pd.DataFrame({"review": ["great film one", "bad film one", "great film two", "bad film two", "great film three", "bad film three", "great film four", "bad film four"], "sentiment": ["positive", "negative"] * 4})
     features, labels = preprocess_data(dataframe)
     train_x, test_x, train_y, test_y, vectorizer = prepare_training_data(features, labels)
     model = train_logistic_regression(train_x, train_y)
